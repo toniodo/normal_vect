@@ -12,6 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   roscpp
   sensor_msgs
+  pcl_conversions
+  pcl_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -151,6 +153,11 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
+include_directories(${PCL_INCLUDE_DIRS})
+include_directories(${EIGEN3_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 #############
 ## Install ##
 #############
@@ -205,3 +212,6 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+add_executable(normal_from_cp scripts/normal_from_cp.cpp)
+target_link_libraries(normal_from_cp ${catkin_LIBRARIES})
