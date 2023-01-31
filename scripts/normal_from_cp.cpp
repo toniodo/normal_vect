@@ -17,6 +17,8 @@
     pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
 
     pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+    // Use 50 nearest neighboor
+    ne.setKSearch(50);
     ne.setInputCloud(cloud);
     ne.compute(*normals);
     return normals;
@@ -24,10 +26,12 @@
 
 // Visualize normals
 void visu(const pcl::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> &cloud, pcl::PointCloud<pcl::Normal>::Ptr &normals){
+    float r, g=255,b;
     pcl::visualization::PCLVisualizer viewer("PCL Viewer");
-    viewer.setBackgroundColor (0.0, 0.0, 0.5);
-    viewer.addPointCloudNormals<pcl::PointXYZ,pcl::Normal>(cloud, normals);
-    
+    viewer.setBackgroundColor (0.0, 0.0, 0.0);
+    viewer.addPointCloudNormals<pcl::PointXYZ,pcl::Normal>(cloud, normals,100,0.4f);
+    pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color(cloud, r, g, b);
+    viewer.addPointCloud(cloud,color,"cloud2");
     while (!viewer.wasStopped ())
     {
       viewer.spinOnce ();
