@@ -14,7 +14,7 @@ public:
         publisherObject = nh.advertise<PublishT>(publishTopicName, queueSize);
         subscriberObject = nh.subscribe<SubscribeT>(subscribeTopicName, queueSize, &PublisherSubscriber::subscriberCallback, this);
     }
-    void subscriberCallback(const typename SubscribeT::ConstPtr& recieve_cp);
+    void subscriberCallback(const typename SubscribeT::ConstPtr &recieve_cp);
 
 protected:
     ros::Subscriber subscriberObject;
