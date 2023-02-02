@@ -7,9 +7,8 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <boost/foreach.hpp>
-#include <boost/bind.hpp>
-#include <normal_vect/cp_callback.hpp>
 
 // Estimate normals
 pcl::PointCloud<pcl::Normal>::Ptr compute_normal(const pcl::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> &cloud)
@@ -39,7 +38,7 @@ void visu(const pcl::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> &cloud, pcl::Poi
     }
 }
 
-void process_cb(const sensor_msgs::PointCloud2 &input, pcl::visualization::PCLVisualizer &viewer)
+void cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
 {
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::toPCL(*input, pcl_pc2);
@@ -54,8 +53,6 @@ void process_cb(const sensor_msgs::PointCloud2 &input, pcl::visualization::PCLVi
 
 int main(int argc, char **argv)
 {
-    pcl::visualization::PCLVisualizer viewer("PCL Viewer");
-    Cp_callback cloud_point;
     ros::init(argc, argv, "normal_cp_sub");
     ros::NodeHandle node_normal;
     // Velodyne VLP-16 produce 300 000 points/sec into the topic /points
