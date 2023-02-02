@@ -13,8 +13,9 @@
 #include <boost/foreach.hpp>
 
 // Estimate normals
- pcl::PointCloud<pcl::Normal>::Ptr compute_normal(const pcl::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> &cloud){
-    pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
+pcl::PointCloud<pcl::Normal>::Ptr compute_normal(const pcl::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> &cloud)
+{
+    pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
 
     pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
     // Use 50 nearest neighboor
@@ -25,30 +26,31 @@
 }
 
 // Visualize normals
-void visu(const pcl::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> &cloud, pcl::PointCloud<pcl::Normal>::Ptr &normals){
-    float r, g=255,b;
+void visu(const pcl::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> &cloud, pcl::PointCloud<pcl::Normal>::Ptr &normals)
+{
+    float r, g = 255, b;
     pcl::visualization::PCLVisualizer viewer("PCL Viewer");
-    viewer.setBackgroundColor (0.0, 0.0, 0.0);
-    viewer.addPointCloudNormals<pcl::PointXYZ,pcl::Normal>(cloud, normals,100,0.4f);
+    viewer.setBackgroundColor(0.0, 0.0, 0.0);
+    viewer.addPointCloudNormals<pcl::PointXYZ, pcl::Normal>(cloud, normals, 100, 0.4f);
     pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> color(cloud, r, g, b);
-    viewer.addPointCloud(cloud,color,"cloud2");
-    while (!viewer.wasStopped ())
+    viewer.addPointCloud(cloud, color, "cloud2");
+    while (!viewer.wasStopped())
     {
-      viewer.spinOnce ();
+        viewer.spinOnce();
     }
 }
 
 void cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
 {
-
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::toPCL(*input, pcl_pc2);
     pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromPCLPointCloud2(pcl_pc2, *temp_cloud);
     // do stuff with temp_cloud here
-    pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
+    pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
     normals = compute_normal(temp_cloud);
-    visu(temp_cloud,normals);
+    ROS_INFO("End of callback");
+    // visu(temp_cloud, normals);
 }
 
 int main(int argc, char **argv)
@@ -56,10 +58,8 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "normal_cp_sub");
     ros::NodeHandle node_normal;
     // Velodyne VLP-16 produce 300 000 points/sec into the topic /points
-    ros::Rate loop_rate(1);
     ros::Subscriber sub;
-    sub = node_normal.subscribe("points", 300000, cloud_cb);
+    sub = node_normal.subscribe("points", 5, cloud_cb);
     ros::spin();
-
     return 0;
 }
