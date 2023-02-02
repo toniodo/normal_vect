@@ -9,9 +9,10 @@
 #include <pcl/visualization/pcl_visualizer.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <boost/foreach.hpp>
+#include <normal_vect/pub_sub_cp.h>
 
 // Estimate normals
-pcl::PointCloud<pcl::Normal>::Ptr compute_normal(const pcl::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> &cloud)
+pcl::PointCloud<pcl::Normal>::Ptr compute_normal(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud)
 {
     pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
 
@@ -38,7 +39,8 @@ void visu(const pcl::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> &cloud, pcl::Poi
     }
 }
 
-void cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
+template<>
+void PublisherSubscriber<pcl::PointCloud<pcl::Normal>, sensor_msgs::PointCloud2>::subscriberCallback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::toPCL(*input, pcl_pc2);
@@ -49,15 +51,14 @@ void cloud_cb(const boost::shared_ptr<const sensor_msgs::PointCloud2> &input)
     normals = compute_normal(temp_cloud);
     ROS_INFO("End of callback");
     // visu(temp_cloud, normals);
+    publisherObject.publish(*normals);  
 }
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "normal_cp_sub");
-    ros::NodeHandle node_normal;
     // Velodyne VLP-16 produce 300 000 points/sec into the topic /points
-    ros::Subscriber sub;
-    sub = node_normal.subscribe("points", 5, cloud_cb);
+    PublisherSubscriber<pcl::PointCloud<pcl::Normal>, sensor_msgs::PointCloud2> pub_sub("norm_of_cp","points",5);
     ros::spin();
     return 0;
 }
