@@ -12,16 +12,17 @@
 #include <normal_vect/pub_sub_cp.h>
 
 // Estimate normals
-pcl::PointCloud<pcl::Normal>::Ptr compute_normal(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud)
+pcl::PointCloud<pcl::PointNormal>::Ptr compute_normal(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud)
 {
     pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-
     pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
     // Use 50 nearest neighboor
     ne.setKSearch(50);
     ne.setInputCloud(cloud);
     ne.compute(*normals);
-    return normals;
+    pcl::concatenateFields(*cloud, *normals, *cloud_with_normals);
+    return cloud_with_normals;
 }
 
 // Visualize normals
@@ -40,24 +41,24 @@ void visu(const pcl::shared_ptr<pcl::PointCloud<pcl::PointXYZ>> &cloud, pcl::Poi
 }
 
 template <>
-void PublisherSubscriber<pcl::PointCloud<pcl::Normal>, sensor_msgs::PointCloud2>::subscriberCallback(const sensor_msgs::PointCloud2::ConstPtr &input)
+void PublisherSubscriber<pcl::PointCloud<pcl::PointNormal>, sensor_msgs::PointCloud2>::subscriberCallback(const sensor_msgs::PointCloud2::ConstPtr &input)
 {
     pcl::PCLPointCloud2 pcl_pc2;
     pcl_conversions::toPCL(*input, pcl_pc2);
     pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::fromPCLPointCloud2(pcl_pc2, *temp_cloud);
     // do stuff with temp_cloud here
-    pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-    normals = compute_normal(temp_cloud);
+    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normals(new pcl::PointCloud<pcl::PointNormal>);
+    cloud_normals = compute_normal(temp_cloud);
     // visu(temp_cloud, normals);
-    publisherObject.publish(*normals);
+    publisherObject.publish(*cloud_normals);
 }
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "normal_cp_sub");
     // Velodyne VLP-16 produce 300 000 points/sec into the topic /points
-    PublisherSubscriber<pcl::PointCloud<pcl::Normal>, sensor_msgs::PointCloud2> pub_sub("norm_of_cp", "points", 5);
+    PublisherSubscriber<pcl::PointCloud<pcl::PointNormal>, sensor_msgs::PointCloud2> pub_sub("normal_cp", "points", 5);
     ros::spin();
     return 0;
 }

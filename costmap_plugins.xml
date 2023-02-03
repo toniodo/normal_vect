@@ -1,0 +1,7 @@
+<class_libraries>
+  <library path="normal_vect/normal_layer">
+    <class type="normal_layer_namespace::NormalLayer" base_class_type="costmap_2d::Layer">
+      <description>A layer that marks points as obstacles if normales' angles go above a threshold</description>
+    </class>
+  </library>
+</class_libraries>

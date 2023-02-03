@@ -214,4 +214,6 @@ add_definitions(${PCL_DEFINITIONS})
 # catkin_add_nosetests(test)
 
 add_executable(normal_from_cp scripts/normal_from_cp.cpp)
+add_executable(normal_layer scripts/normal_layer.cpp)
+
 target_link_libraries(normal_from_cp ${catkin_LIBRARIES} pcl_visualization)
