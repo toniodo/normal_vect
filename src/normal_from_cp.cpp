@@ -6,6 +6,7 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/features/normal_3d.h>
+#include <pcl/features/normal_3d_omp.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <boost/foreach.hpp>
@@ -15,9 +16,11 @@
 pcl::PointCloud<pcl::PointNormal>::Ptr compute_normal(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud)
 {
     pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-    pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+    pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> ne;
     pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
     // Use 50 nearest neighboor
+    ne.setSearchMethod (tree);
     ne.setKSearch(50);
     ne.setInputCloud(cloud);
     ne.compute(*normals);
