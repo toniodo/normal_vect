@@ -25,7 +25,7 @@ namespace normal_layer_namespace
         default_value_ = NO_INFORMATION;
         matchSize();
 
-        // TODO create subscriber
+        normal_sub = nh.subscribe("normal_cp", 1, &NormalLayer::normalCallback, this);
 
         dsrv_ = new dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>(nh);
         dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>::CallbackType cb = boost::bind(
@@ -34,6 +34,10 @@ namespace normal_layer_namespace
     }
 
     // TODO create call that update cloud_normals
+    void NormalLayer::normalCallback(const pcl::PointCloud<pcl::PointNormal>::ConstPtr &input)
+    {
+        cloud_normals = input;
+    }
 
     void NormalLayer::matchSize()
     {
@@ -47,7 +51,6 @@ namespace normal_layer_namespace
         enabled_ = config.enabled;
     }
 
-    
     /*void NormalLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x,
                                    double *min_y, double *max_x, double *max_y)
     {
@@ -68,7 +71,7 @@ namespace normal_layer_namespace
         *max_y = std::max(*max_y, mark_y);
     }*/
 
-    void NormalLayer::updateCosts(Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j)
+    void NormalLayer::updateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
     {
         if (!enabled_)
             return;
@@ -85,7 +88,10 @@ namespace normal_layer_namespace
             if (normal.dot(dir) >= thresh)
             {
                 worldToMap(cloud_normals->points[i].x, cloud_normals->points[i].y, mx, my);
-                setCost(mx,my, LETHAL_OBSTACLE);
+                if (mx <= min_i && mx >= max_i && my <= min_j && my >= max_j)
+                {
+                    master_grid.setCost(mx, my, LETHAL_OBSTACLE);
+                }
             }
         }
     }
