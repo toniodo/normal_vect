@@ -1,6 +1,6 @@
 <class_libraries>
-  <library path="lib/libcostmap_plugins">
-    <class type="normal_vect::NormalLayer" base_class_type="costmap_2d::Layer">
+  <library path="lib/libnormal">
+    <class type="normal_layer_namespace::NormalLayer" base_class_type="costmap_2d::Layer">
       <description>A layer that marks points as obstacles if normales' angles go above a threshold</description>
     </class>
   </library>
