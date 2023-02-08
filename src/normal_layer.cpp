@@ -16,16 +16,18 @@ using costmap_2d::NO_INFORMATION;
 namespace normal_layer_namespace
 {
 
-    NormalLayer::NormalLayer() {}
+    NormalLayer::NormalLayer()
+    {
+        cloud_normals = boost::make_shared<pcl::PointCloud<pcl::PointNormal>>();
+    }
 
     void NormalLayer::onInitialize()
     {
-        ros::NodeHandle nh("~/" + name_);
         current_ = true;
         default_value_ = NO_INFORMATION;
         matchSize();
 
-        normal_sub = nh.subscribe("normal_cp", 1, &NormalLayer::normalCallback, this);
+        normal_sub = nh.subscribe("normal_cp", 5, &NormalLayer::normalCallback, this);
 
         dsrv_ = new dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>(nh);
         dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>::CallbackType cb = boost::bind(
@@ -51,7 +53,7 @@ namespace normal_layer_namespace
         enabled_ = config.enabled;
     }
 
-    /*void NormalLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x,
+    void NormalLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x,
                                    double *min_y, double *max_x, double *max_y)
     {
         if (!enabled_)
@@ -69,13 +71,12 @@ namespace normal_layer_namespace
         *min_y = std::min(*min_y, mark_y);
         *max_x = std::max(*max_x, mark_x);
         *max_y = std::max(*max_y, mark_y);
-    }*/
+    }
 
     void NormalLayer::updateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
     {
         if (!enabled_)
             return;
-
         float maxAngleDeg = 30;
         float thresh = std::cos(maxAngleDeg * M_PI / 180.0);
         unsigned int mx;
@@ -85,10 +86,11 @@ namespace normal_layer_namespace
         for (auto i = 0; i < cloud_normals->size(); ++i)
         {
             const auto &normal = cloud_normals->points[i].getNormalVector3fMap();
-            if (normal.dot(dir) >= thresh)
+            // To correct errors in direction we use absolute value
+            if (abs(normal.dot(dir)) <= thresh)
             {
-                worldToMap(cloud_normals->points[i].x, cloud_normals->points[i].y, mx, my);
-                if (mx <= min_i && mx >= max_i && my <= min_j && my >= max_j)
+                master_grid.worldToMap(cloud_normals->points[i].x, cloud_normals->points[i].y, mx, my);
+                if (mx >= min_i && mx <= max_i && my >= min_j && my <= max_j)
                 {
                     master_grid.setCost(mx, my, LETHAL_OBSTACLE);
                 }
