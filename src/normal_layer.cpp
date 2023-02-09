@@ -35,7 +35,6 @@ namespace normal_layer_namespace
         dsrv_->setCallback(cb);
     }
 
-    // TODO create call that update cloud_normals
     void NormalLayer::normalCallback(const pcl::PointCloud<pcl::PointNormal>::ConstPtr &input)
     {
         cloud_normals = input;
@@ -75,6 +74,12 @@ namespace normal_layer_namespace
 
     void NormalLayer::updateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
     {
+        // Clear previous costs
+        unsigned int x0 = master_grid.getOriginX();
+        unsigned int y0 = master_grid.getOriginY();
+        unsigned int xn = master_grid.getSizeInMetersX();
+        unsigned int yn = master_grid.getSizeInMetersY();
+        master_grid.resetMap(x0, y0, xn, yn);
         if (!enabled_)
             return;
         float maxAngleDeg = 30;
@@ -92,35 +97,10 @@ namespace normal_layer_namespace
                 master_grid.worldToMap(cloud_normals->points[i].x, cloud_normals->points[i].y, mx, my);
                 if (mx >= min_i && mx <= max_i && my >= min_j && my <= max_j)
                 {
+
                     master_grid.setCost(mx, my, LETHAL_OBSTACLE);
                 }
             }
         }
     }
 } // end namespace
-
-/*
-template <>
-void PublisherSubscriber<costmap_2d::Costmap2D, pcl::PointCloud<pcl::PointNormal>>::subscriberCallback(const pcl::PointCloud<pcl::PointNormal>::ConstPtr &input)
-{
-    // Set a threshold angle
-    float maxAngleDeg = 30;
-    // Normal to the horizon
-    Eigen::Vector3d dir(0.0, 0.0, 1.0);
-    // do stuff with temp_cloud here
-    pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-    normal_layer_namespace::NormalLayer new_layer;
-    new_layer.onInitialize();
-
-    publisherObject.publish(new_layer);
-}
-
-int main(int argc, char **argv)
-{
-    ros::init(argc, argv, "costmap_threshold");
-    // Velodyne VLP-16 produce 300 000 points/sec into the topic /points
-    PublisherSubscriber<costmap_2d::Costmap2D, pcl::PointCloud<pcl::PointNormal>> pub_sub("costmap_normal", "normal_of_cp", 5);
-
-    ros::spin();
-    return 0;
-}*/

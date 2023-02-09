@@ -1,6 +1,7 @@
 #ifndef NORMAL_LAYER_H_
 #define NORMAL_LAYER_H_
 #include <ros/ros.h>
+#include <stack>
 #include <costmap_2d/layer.h>
 #include <costmap_2d/layered_costmap.h>
 #include <costmap_2d/GenericPluginConfig.h>
