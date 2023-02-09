@@ -67,10 +67,10 @@ namespace normal_layer_namespace
             setCost(mx, my, LETHAL_OBSTACLE);
         }
 
-        *min_x = std::min(*min_x, mark_x);
-        *min_y = std::min(*min_y, mark_y);
-        *max_x = std::max(*max_x, mark_x);
-        *max_y = std::max(*max_y, mark_y);
+        *min_x = mark_x-5;
+        *min_y = mark_y-5;
+        *max_x = mark_x+5;
+        *max_y = mark_y+5;
     }
 
     void NormalLayer::updateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
