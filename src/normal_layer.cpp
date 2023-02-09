@@ -12,6 +12,7 @@ PLUGINLIB_EXPORT_CLASS(normal_layer_namespace::NormalLayer, costmap_2d::Layer)
 
 using costmap_2d::LETHAL_OBSTACLE;
 using costmap_2d::NO_INFORMATION;
+using costmap_2d::FREE_SPACE;
 
 namespace normal_layer_namespace
 {
@@ -75,11 +76,11 @@ namespace normal_layer_namespace
     void NormalLayer::updateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
     {
         // Clear previous costs
-        unsigned int x0 = master_grid.getOriginX();
-        unsigned int y0 = master_grid.getOriginY();
-        unsigned int xn = master_grid.getSizeInCellsX();
-        unsigned int yn = master_grid.getSizeInCellsY();
-        master_grid.resetMap(x0, y0, x0+xn, y0+yn);
+        for (auto i=min_i;i<max_i;++i){
+            for (auto j=min_j;j<max_j;++j){
+                master_grid.setCost(i,j,FREE_SPACE);
+            }
+        }
         if (!enabled_)
             return;
         float maxAngleDeg = 30;
