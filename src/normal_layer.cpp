@@ -77,9 +77,9 @@ namespace normal_layer_namespace
         // Clear previous costs
         unsigned int x0 = master_grid.getOriginX();
         unsigned int y0 = master_grid.getOriginY();
-        unsigned int xn = master_grid.getSizeInMetersX();
-        unsigned int yn = master_grid.getSizeInMetersY();
-        master_grid.resetMap(x0, y0, xn, yn);
+        unsigned int xn = master_grid.getSizeInCellsX();
+        unsigned int yn = master_grid.getSizeInCellsY();
+        master_grid.resetMap(x0, y0, x0+xn, y0+yn);
         if (!enabled_)
             return;
         float maxAngleDeg = 30;
@@ -92,14 +92,10 @@ namespace normal_layer_namespace
         {
             const auto &normal = cloud_normals->points[i].getNormalVector3fMap();
             // To correct errors in direction we use absolute value
-            if (abs(normal.dot(dir)) <= thresh)
+            if (abs(normal.dot(dir)) <= thresh && master_grid.worldToMap(cloud_normals->points[i].x, cloud_normals->points[i].y, mx, my) && mx >= min_i && mx <= max_i && my >= min_j && my <= max_j)
             {
-                master_grid.worldToMap(cloud_normals->points[i].x, cloud_normals->points[i].y, mx, my);
-                if (mx >= min_i && mx <= max_i && my >= min_j && my <= max_j)
-                {
 
-                    master_grid.setCost(mx, my, LETHAL_OBSTACLE);
-                }
+                master_grid.setCost(mx, my, LETHAL_OBSTACLE);
             }
         }
     }
