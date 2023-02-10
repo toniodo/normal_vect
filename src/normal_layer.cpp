@@ -4,7 +4,7 @@
 #include <pcl_ros/transforms.h>
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d.h>
-#include <pcl/features/normal_3d_omp.h>
+#include <pcl/features/normal_3d_omp.h> // Use to accelerate performances
 #include <normal_vect/normal_layer.h>
 #include <pluginlib/class_list_macros.h>
 
@@ -19,6 +19,7 @@ namespace normal_layer_namespace
 
     NormalLayer::NormalLayer()
     {
+        // Init the Cloud point of normals
         cloud_normals = boost::make_shared<pcl::PointCloud<pcl::PointNormal>>();
     }
 
@@ -28,6 +29,7 @@ namespace normal_layer_namespace
         default_value_ = NO_INFORMATION;
         matchSize();
 
+        // Set subscriber
         normal_sub = nh.subscribe("points", 5, &NormalLayer::normalCallback, this);
 
         dsrv_ = new dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>(nh);
@@ -42,8 +44,7 @@ namespace normal_layer_namespace
         pcl_conversions::toPCL(*input, pcl_pc2);
         pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromPCLPointCloud2(pcl_pc2, *temp_cloud);
-        // do stuff with temp_cloud here
-        pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normals(new pcl::PointCloud<pcl::PointNormal>);
+        // Compute normals from the converted cloud point
         cloud_normals = computeNormal(temp_cloud);
     }
 
@@ -72,7 +73,7 @@ namespace normal_layer_namespace
         {
             setCost(mx, my, LETHAL_OBSTACLE);
         }
-
+        // Set bounds according to the size of the local costmap
         *min_x = mark_x - 5;
         *min_y = mark_y - 5;
         *max_x = mark_x + 5;
@@ -89,21 +90,26 @@ namespace normal_layer_namespace
                 master_grid.setCost(i, j, FREE_SPACE);
             }
         }
+
         if (!enabled_)
             return;
+
         float maxAngleDeg = 30;
         float thresh = std::cos(maxAngleDeg * M_PI / 180.0);
         unsigned int mx;
         unsigned int my;
+        // The direction of normal of the horizon
         Eigen::Vector3f dir(0.0, 0.0, 1.0);
-        pcl::PointIndicesPtr indices = pcl::PointIndicesPtr(new pcl::PointIndices);
+
         for (auto i = 0; i < cloud_normals->size(); ++i)
         {
             const auto &normal = cloud_normals->points[i].getNormalVector3fMap();
-            // To correct errors in direction we use absolute value
+            /*
+            To correct errors in direction we use absolute value and check the condition according to the maximum angle.
+            We also check if the point fits to the map of master_grid and to the updated bounds.
+            */
             if (abs(normal.dot(dir)) <= thresh && master_grid.worldToMap(cloud_normals->points[i].x, cloud_normals->points[i].y, mx, my) && mx >= min_i && mx <= max_i && my >= min_j && my <= max_j)
             {
-
                 master_grid.setCost(mx, my, LETHAL_OBSTACLE);
             }
         }
@@ -116,7 +122,7 @@ namespace normal_layer_namespace
         pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> ne;
         pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
         pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
-        // Use 50 nearest neighboor
+        // Use of a Kd tree method to find the nearest neighboors
         ne.setSearchMethod(tree);
         ne.setKSearch(50);
         ne.setInputCloud(cloud);

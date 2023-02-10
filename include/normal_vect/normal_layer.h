@@ -19,9 +19,11 @@ namespace normal_layer_namespace
 
     void onInitialize();
 
+    // To set up the area of the layer in which costs will be updated
     void updateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y, double *max_x,
                       double *max_y);
 
+    // Update costs according to the angle of the normals
     void updateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j);
 
     bool isDiscretized()
@@ -31,6 +33,7 @@ namespace normal_layer_namespace
 
     void matchSize();
 
+    // Callback to get normal from Lidar
     void normalCallback(const sensor_msgs::PointCloud2::ConstPtr &input);
 
     pcl::PointCloud<pcl::PointNormal>::Ptr computeNormal(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
@@ -39,8 +42,11 @@ namespace normal_layer_namespace
 
   private:
     pcl::PointCloud<pcl::PointNormal>::ConstPtr cloud_normals;
+
     ros::NodeHandle nh;
+
     void reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level);
+
     dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
   };
 }
