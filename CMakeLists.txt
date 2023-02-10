@@ -213,6 +213,5 @@ add_definitions(${PCL_DEFINITIONS})
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(normal_from_cp src/normal_from_cp.cpp)
 add_library(normal_layer src/normal_layer.cpp)
-target_link_libraries(normal_from_cp ${catkin_LIBRARIES} pcl_visualization)
+target_link_libraries(normal_layer ${catkin_LIBRARIES} pcl_visualization)

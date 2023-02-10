@@ -4,15 +4,15 @@
 #include <pcl_ros/transforms.h>
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d.h>
-#include <normal_vect/pub_sub_cp.h>
+#include <pcl/features/normal_3d_omp.h>
 #include <normal_vect/normal_layer.h>
 #include <pluginlib/class_list_macros.h>
 
 PLUGINLIB_EXPORT_CLASS(normal_layer_namespace::NormalLayer, costmap_2d::Layer)
 
+using costmap_2d::FREE_SPACE;
 using costmap_2d::LETHAL_OBSTACLE;
 using costmap_2d::NO_INFORMATION;
-using costmap_2d::FREE_SPACE;
 
 namespace normal_layer_namespace
 {
@@ -28,7 +28,7 @@ namespace normal_layer_namespace
         default_value_ = NO_INFORMATION;
         matchSize();
 
-        normal_sub = nh.subscribe("normal_cp", 5, &NormalLayer::normalCallback, this);
+        normal_sub = nh.subscribe("points", 5, &NormalLayer::normalCallback, this);
 
         dsrv_ = new dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>(nh);
         dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>::CallbackType cb = boost::bind(
@@ -36,9 +36,15 @@ namespace normal_layer_namespace
         dsrv_->setCallback(cb);
     }
 
-    void NormalLayer::normalCallback(const pcl::PointCloud<pcl::PointNormal>::ConstPtr &input)
+    void NormalLayer::normalCallback(const sensor_msgs::PointCloud2::ConstPtr &input)
     {
-        cloud_normals = input;
+        pcl::PCLPointCloud2 pcl_pc2;
+        pcl_conversions::toPCL(*input, pcl_pc2);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+        pcl::fromPCLPointCloud2(pcl_pc2, *temp_cloud);
+        // do stuff with temp_cloud here
+        pcl::PointCloud<pcl::PointNormal>::Ptr cloud_normals(new pcl::PointCloud<pcl::PointNormal>);
+        cloud_normals = computeNormal(temp_cloud);
     }
 
     void NormalLayer::matchSize()
@@ -67,18 +73,20 @@ namespace normal_layer_namespace
             setCost(mx, my, LETHAL_OBSTACLE);
         }
 
-        *min_x = mark_x-5;
-        *min_y = mark_y-5;
-        *max_x = mark_x+5;
-        *max_y = mark_y+5;
+        *min_x = mark_x - 5;
+        *min_y = mark_y - 5;
+        *max_x = mark_x + 5;
+        *max_y = mark_y + 5;
     }
 
     void NormalLayer::updateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
     {
         // Clear previous costs
-        for (auto i=min_i;i<max_i;++i){
-            for (auto j=min_j;j<max_j;++j){
-                master_grid.setCost(i,j,FREE_SPACE);
+        for (auto i = min_i; i < max_i; ++i)
+        {
+            for (auto j = min_j; j < max_j; ++j)
+            {
+                master_grid.setCost(i, j, FREE_SPACE);
             }
         }
         if (!enabled_)
@@ -100,4 +108,21 @@ namespace normal_layer_namespace
             }
         }
     }
+
+    // Estimate normals
+    pcl::PointCloud<pcl::PointNormal>::Ptr NormalLayer::computeNormal(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud)
+    {
+        pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
+        pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> ne;
+        pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(new pcl::PointCloud<pcl::PointNormal>);
+        pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+        // Use 50 nearest neighboor
+        ne.setSearchMethod(tree);
+        ne.setKSearch(50);
+        ne.setInputCloud(cloud);
+        ne.compute(*normals);
+        pcl::concatenateFields(*cloud, *normals, *cloud_with_normals);
+        return cloud_with_normals;
+    }
+
 } // end namespace

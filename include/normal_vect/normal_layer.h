@@ -31,7 +31,9 @@ namespace normal_layer_namespace
 
     void matchSize();
 
-    void normalCallback(const pcl::PointCloud<pcl::PointNormal>::ConstPtr &input);
+    void normalCallback(const sensor_msgs::PointCloud2::ConstPtr &input);
+
+    pcl::PointCloud<pcl::PointNormal>::Ptr computeNormal(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
 
     ros::Subscriber normal_sub;
 
