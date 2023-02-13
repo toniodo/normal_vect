@@ -1,7 +1,7 @@
 #ifndef NORMAL_LAYER_H_
 #define NORMAL_LAYER_H_
 #include <ros/ros.h>
-#include <stack>
+#include <sensor_msgs/Imu.h>
 #include <costmap_2d/layer.h>
 #include <costmap_2d/layered_costmap.h>
 #include <costmap_2d/GenericPluginConfig.h>
@@ -36,12 +36,18 @@ namespace normal_layer_namespace
     // Callback to get normal from Lidar
     void normalCallback(const sensor_msgs::PointCloud2::ConstPtr &input);
 
+    void imuCallback(const sensor_msgs::Imu::ConstPtr &input);
+
     pcl::PointCloud<pcl::PointNormal>::Ptr computeNormal(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
 
     ros::Subscriber normal_sub;
 
+    ros::Subscriber imu_sub;
+
   private:
     pcl::PointCloud<pcl::PointNormal>::ConstPtr cloud_normals;
+
+    geometry_msgs::Vector3 orientation_imu;
 
     ros::NodeHandle nh;
 

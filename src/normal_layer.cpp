@@ -30,10 +30,13 @@ namespace normal_layer_namespace
         matchSize();
 
         std::string topic_lidar;
-        nh.getParam("topic_lidar",topic_lidar);
+        nh.getParam("topic_lidar", topic_lidar);
+        std::string topic_imu;
+        nh.getParam("topic_imu", topic_imu);
 
-        // Set subscriber
+        // Set subscribers
         normal_sub = nh.subscribe(topic_lidar, 5, &NormalLayer::normalCallback, this);
+        imu_sub = nh.subscribe(topic_imu, 5, &NormalLayer::imuCallback, this);
 
         dsrv_ = new dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>(nh);
         dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>::CallbackType cb = boost::bind(
@@ -49,6 +52,11 @@ namespace normal_layer_namespace
         pcl::fromPCLPointCloud2(pcl_pc2, *temp_cloud);
         // Compute normals from the converted cloud point
         cloud_normals = computeNormal(temp_cloud);
+    }
+
+    void NormalLayer::imuCallback(const sensor_msgs::Imu::ConstPtr &input)
+    {
+        orientation_imu = input->linear_acceleration;
     }
 
     void NormalLayer::matchSize()
@@ -84,10 +92,10 @@ namespace normal_layer_namespace
         nh.getParam("width_local", width_local);
 
         // Set bounds according to the size of the local costmap
-        *min_x = mark_x - height_local/2;
-        *min_y = mark_y - width_local/2;
-        *max_x = mark_x + height_local/2;
-        *max_y = mark_y + width_local/2;
+        *min_x = mark_x - height_local / 2;
+        *min_y = mark_y - width_local / 2;
+        *max_x = mark_x + height_local / 2;
+        *max_y = mark_y + width_local / 2;
     }
 
     void NormalLayer::updateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
@@ -105,12 +113,15 @@ namespace normal_layer_namespace
             return;
 
         float maxAngleDeg;
-        nh.getParam("angle_threshold", maxAngleDeg);    
+        nh.getParam("angle_threshold", maxAngleDeg);
         float thresh = std::cos(maxAngleDeg * M_PI / 180.0);
         unsigned int mx;
         unsigned int my;
-        // The direction of normal of the horizon
-        Eigen::Vector3f dir(0.0, 0.0, 1.0);
+        // The direction of normal of the imu
+        float x = orientation_imu.x;
+        float y = orientation_imu.y;
+        float z = orientation_imu.z;
+        Eigen::Vector3f dir(x, y, z);
 
         for (auto i = 0; i < cloud_normals->size(); ++i)
         {
