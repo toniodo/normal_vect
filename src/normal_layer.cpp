@@ -29,8 +29,11 @@ namespace normal_layer_namespace
         default_value_ = NO_INFORMATION;
         matchSize();
 
+        std::string topic_lidar;
+        nh.getParam("topic_lidar",topic_lidar);
+
         // Set subscriber
-        normal_sub = nh.subscribe("points", 5, &NormalLayer::normalCallback, this);
+        normal_sub = nh.subscribe(topic_lidar, 5, &NormalLayer::normalCallback, this);
 
         dsrv_ = new dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>(nh);
         dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig>::CallbackType cb = boost::bind(
@@ -73,11 +76,18 @@ namespace normal_layer_namespace
         {
             setCost(mx, my, LETHAL_OBSTACLE);
         }
+
+        // Get parameters from launch file
+        double height_local;
+        double width_local;
+        nh.getParam("height_local", height_local);
+        nh.getParam("width_local", width_local);
+
         // Set bounds according to the size of the local costmap
-        *min_x = mark_x - 5;
-        *min_y = mark_y - 5;
-        *max_x = mark_x + 5;
-        *max_y = mark_y + 5;
+        *min_x = mark_x - height_local/2;
+        *min_y = mark_y - width_local/2;
+        *max_x = mark_x + height_local/2;
+        *max_y = mark_y + width_local/2;
     }
 
     void NormalLayer::updateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
@@ -94,7 +104,8 @@ namespace normal_layer_namespace
         if (!enabled_)
             return;
 
-        float maxAngleDeg = 30;
+        float maxAngleDeg;
+        nh.getParam("angle_threshold", maxAngleDeg);    
         float thresh = std::cos(maxAngleDeg * M_PI / 180.0);
         unsigned int mx;
         unsigned int my;
@@ -124,7 +135,11 @@ namespace normal_layer_namespace
         pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
         // Use of a Kd tree method to find the nearest neighboors
         ne.setSearchMethod(tree);
-        ne.setKSearch(50);
+
+        int nb_neighboor;
+        nh.getParam("nb_neighboor", nb_neighboor);
+        ne.setKSearch(nb_neighboor);
+
         ne.setInputCloud(cloud);
         ne.compute(*normals);
         pcl::concatenateFields(*cloud, *normals, *cloud_with_normals);

@@ -1,0 +1,11 @@
+<launch>
+    <env name="HUSKY_LASER_3D_ENABLED" value="true"/>
+    <include file="$(find husky_gazebo)/launch/husky_playpen.launch" />
+    <include file="$(find husky_viz)/launch/view_robot.launch" />
+    <include file="$(find husky_navigation)/launch/map_less_navigation.launch" />
+    <param name="angle_threshold" type="int" value="30"/>
+    <param name="height_local" type="int" value="10"/>
+    <param name="width_local" type="int" value="10"/>
+    <param name="nb_neighboor" type="int" value="50"/>
+    <param name="topic_lidar" type="str" value="points"/>
+</launch>
