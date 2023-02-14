@@ -9,4 +9,6 @@
     <param name="nb_neighboor" type="int" value="50"/>
     <param name="topic_lidar" type="str" value="points"/>
     <param name="topic_imu" type="str" value="imu/data"/>
+    <param name="laser_r" value="0"/>
+    <param name="laser_p" value="0.79"/>
 </launch>

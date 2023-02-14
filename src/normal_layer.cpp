@@ -117,10 +117,16 @@ namespace normal_layer_namespace
         float thresh = std::cos(maxAngleDeg * M_PI / 180.0);
         unsigned int mx;
         unsigned int my;
-        // The direction of normal of the imu
-        float x = orientation_imu.x;
-        float y = orientation_imu.y;
-        float z = orientation_imu.z;
+
+        // The direction of normal of the base according to the frame reference of the lidar
+        float laser_r;
+        float laser_p;
+        nh.getParam("laser_r", laser_r);
+        nh.getParam("laser_p", laser_p);
+        float x = -cos(laser_p) * cos(laser_r);
+        float y = sin(laser_p);
+        float z = cos(laser_r) * cos(laser_p);
+
         Eigen::Vector3f dir(x, y, z);
 
         for (auto i = 0; i < cloud_normals->size(); ++i)
