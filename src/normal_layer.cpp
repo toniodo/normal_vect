@@ -119,11 +119,11 @@ namespace normal_layer_namespace
         unsigned int my;
 
         // The direction of normal of the base according to the frame reference of the lidar
-        float laser_r;
-        float laser_p;
+        float laser_r; // Roll
+        float laser_p; // Pitch
         nh.getParam("laser_r", laser_r);
         nh.getParam("laser_p", laser_p);
-        float x = -cos(laser_p) * cos(laser_r);
+        float x = -cos(laser_p) * sin(laser_r);
         float y = sin(laser_p);
         float z = cos(laser_r) * cos(laser_p);
 
