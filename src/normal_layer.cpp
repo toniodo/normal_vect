@@ -128,7 +128,7 @@ namespace normal_layer_namespace
         float z = cos(laser_r) * cos(laser_p);
 
         Eigen::Vector3f dir(x, y, z);
-
+        dir.normalize();
         for (auto i = 0; i < cloud_normals->size(); ++i)
         {
             const auto &normal = cloud_normals->points[i].getNormalVector3fMap();
