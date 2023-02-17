@@ -56,7 +56,7 @@ namespace normal_layer_namespace
 
     void NormalLayer::imuCallback(const sensor_msgs::Imu::ConstPtr &input)
     {
-        orientation_imu = input->linear_acceleration;
+        orientation_imu = input->orientation;
     }
 
     void NormalLayer::matchSize()
@@ -118,16 +118,9 @@ namespace normal_layer_namespace
         unsigned int mx;
         unsigned int my;
 
-        // The direction of normal of the base according to the frame reference of the lidar
-        float laser_r; // Roll
-        float laser_p; // Pitch
-        nh.getParam("laser_r", laser_r);
-        nh.getParam("laser_p", laser_p);
-        float x = -cos(laser_p) * sin(laser_r);
-        float y = sin(laser_p);
-        float z = cos(laser_r) * cos(laser_p);
+        // The direction of normal of the base according to the frame reference of the IMU
 
-        Eigen::Vector3f dir(x, y, z);
+        Eigen::Vector3f dir(orientation_imu.x, orientation_imu.y, orientation_imu.z);
         dir.normalize();
         for (auto i = 0; i < cloud_normals->size(); ++i)
         {

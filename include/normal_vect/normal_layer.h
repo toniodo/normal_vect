@@ -47,7 +47,7 @@ namespace normal_layer_namespace
   private:
     pcl::PointCloud<pcl::PointNormal>::ConstPtr cloud_normals;
 
-    geometry_msgs::Vector3 orientation_imu;
+    geometry_msgs::Quaternion orientation_imu;
 
     ros::NodeHandle nh;
 
