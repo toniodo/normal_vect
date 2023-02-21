@@ -3,10 +3,5 @@
     <node pkg="tf" type="static_transform_publisher" name="odometry_tfnode" args="0 0 0 0 0 0  base_link odom 50" />
     <include file="$(find husky_viz)/launch/view_model.launch" />
     <include file="$(find husky_navigation)/launch/move_base_mapless_demo.launch" />
-    <param name="angle_threshold" type="int" value="30"/>
-    <param name="height_local" type="int" value="10"/>
-    <param name="width_local" type="int" value="10"/>
-    <param name="nb_neighboor" type="int" value="75"/>
-    <param name="topic_lidar" type="str" value="rslidar_points"/>
-    <param name="topic_imu" type="str" value="imu/data"/>
+    <rosparam command="load" file="config/normal_costmap_params.yaml"/>
 </launch>
