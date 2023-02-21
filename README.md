@@ -19,7 +19,7 @@ In the parameters file of the desired costmap (local or global) add the followin
 ```
 In the package, a .yaml file is already created to set the parameters of the plugin.
 
-## Launch a simulation
+## Launch a demo
 A launch file has been created to do a demo (with a rosbag for example).
 Simply, run the following command:
 ```bash
