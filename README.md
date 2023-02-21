@@ -17,8 +17,10 @@ In the parameters file of the desired costmap (local or global) add the followin
 ```yaml
   - {name: normal_layer,                type: "normal_layer_namespace::NormalLayer"}
 ```
-## Launch a simulation
-A launch file has been created to set parameters (size of the local (or global) costmap, number of neigboors to consider for Normal Estimation, angle threshold, topics of sensors...)
+In the package, a .yaml file is already created to set the parameters of the plugin.
+
+## Launch a demo
+A launch file has been created to do a demo (with a rosbag for example).
 Simply, run the following command:
 ```bash
 roslaunch normal_vect normal_simulation.launch

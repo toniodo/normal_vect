@@ -1,0 +1,6 @@
+angle_threshold: 30
+height_local: 10
+width_local: 10
+nb_neighboor: 75
+topic_lidar: "rslidar_points"
+topic_imu: "imu/data"
