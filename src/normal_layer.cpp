@@ -5,6 +5,7 @@
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/features/normal_3d_omp.h> // Use to accelerate performances
+// #include <pcl/filters/statistical_outlier_removal.h> // Filter to remove outliers
 #include <normal_vect/normal_layer.h>
 #include <pluginlib/class_list_macros.h>
 
@@ -50,7 +51,21 @@ namespace normal_layer_namespace
         pcl_conversions::toPCL(*input, pcl_pc2);
         pcl::PointCloud<pcl::PointXYZ>::Ptr temp_cloud(new pcl::PointCloud<pcl::PointXYZ>);
         pcl::fromPCLPointCloud2(pcl_pc2, *temp_cloud);
-        // Compute normals from the converted cloud point
+
+        // // Create the filtering object from the converted cloud
+        // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+        // pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+        // int nb_neighboor;
+        // nh.getParam("nb_neighboor", nb_neighboor);
+        // sor.setInputCloud(temp_cloud);
+        // sor.setMeanK(nb_neighboor);
+        // sor.setStddevMulThresh(0.25);
+        // sor.filter(*cloud_filtered);
+
+        // // Compute normals from the filtered cloud point
+        // cloud_normals = computeNormal(cloud_filtered);
+
+        // Compute normals from the converted cloud
         cloud_normals = computeNormal(temp_cloud);
     }
 
@@ -148,6 +163,7 @@ namespace normal_layer_namespace
 
         int nb_neighboor;
         nh.getParam("nb_neighboor", nb_neighboor);
+        ne.setNumberOfThreads(3);
         ne.setKSearch(nb_neighboor);
 
         ne.setInputCloud(cloud);
