@@ -29,4 +29,4 @@ This will create different nodes:
 - Rviz to visualize Husky "Paquerette" robot and messages from its sensors
 - Move base mapless demo launchfile, in which the plugin had been added previously
 
-In parallel, you can play a rosbag (don't forget too add the parameter ```bash --clock```), and then visualize the result in Rviz.
+In parallel, you can play a rosbag (don't forget too add the parameter ```--clock```), and then visualize the result in Rviz.
