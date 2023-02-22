@@ -3,5 +3,5 @@
     <node pkg="tf" type="static_transform_publisher" name="odometry_tfnode" args="0 0 0 0 0 0  base_link odom 50" />
     <include file="$(find husky_viz)/launch/view_model.launch" />
     <include file="$(find husky_navigation)/launch/move_base_mapless_demo.launch" />
-    <rosparam command="load" file="config/normal_costmap_params.yaml"/>
+    <rosparam command="load" file="$(find normal_vect)/config/normal_costmap_params.yaml"/>
 </launch>

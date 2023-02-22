@@ -163,7 +163,9 @@ namespace normal_layer_namespace
 
         int nb_neighboor;
         nh.getParam("nb_neighboor", nb_neighboor);
-        ne.setNumberOfThreads(3);
+        int nb_thread;
+        nh.getParam("nb_thread", nb_thread);
+        ne.setNumberOfThreads(nb_thread);
         ne.setKSearch(nb_neighboor);
 
         ne.setInputCloud(cloud);
