@@ -22,6 +22,13 @@ namespace normal_layer_namespace
     {
         // Init the Cloud point of normals
         cloud_normals = boost::make_shared<pcl::PointCloud<pcl::PointNormal>>();
+        /*
+        We approximate the curve as a function like f(x)=alpha*cos(x) where alpha is the curvature and can set a threshold angle.
+        This avoid brutal changes on the terrain.
+        */
+        float maxAngleCurv;
+        nh.getParam("angle_curvature", maxAngleCurv);
+        max_curv = M_PI * tan(maxAngleCurv * M_PI / 180) / 2;
     }
 
     void NormalLayer::onInitialize()
@@ -144,7 +151,7 @@ namespace normal_layer_namespace
             To correct errors in direction we use absolute value and check the condition according to the maximum angle.
             We also check if the point fits to the map of master_grid and to the updated bounds.
             */
-            if (abs(normal.dot(dir)) <= thresh && master_grid.worldToMap(cloud_normals->points[i].x, cloud_normals->points[i].y, mx, my) && mx >= min_i && mx <= max_i && my >= min_j && my <= max_j)
+            if (abs(cloud_normals->points[i].curvature) <= max_curv && abs(normal.dot(dir)) <= thresh && master_grid.worldToMap(cloud_normals->points[i].x, cloud_normals->points[i].y, mx, my) && mx >= min_i && mx <= max_i && my >= min_j && my <= max_j)
             {
                 master_grid.setCost(mx, my, LETHAL_OBSTACLE);
             }

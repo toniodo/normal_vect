@@ -1,7 +1,8 @@
-angle_threshold: 30
+angle_threshold: 35
+angle_curvature: 60
 height_local: 10
 width_local: 10
-nb_neighboor: 75
+nb_neighboor: 100
 nb_thread: 2
-topic_lidar: "rslidar_points"
+topic_lidar: "/zed_node/point_cloud/cloud_registered"
 topic_imu: "imu/data"

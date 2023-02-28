@@ -51,6 +51,8 @@ namespace normal_layer_namespace
 
     ros::NodeHandle nh;
 
+    double max_curv; // To avoid to recalculate
+
     void reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level);
 
     dynamic_reconfigure::Server<costmap_2d::GenericPluginConfig> *dsrv_;
