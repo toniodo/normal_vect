@@ -115,15 +115,6 @@ namespace normal_layer_namespace
 
     void NormalLayer::updateCosts(Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
     {
-        // Clear previous costs
-        for (auto i = min_i; i < max_i; ++i)
-        {
-            for (auto j = min_j; j < max_j; ++j)
-            {
-                master_grid.setCost(i, j, FREE_SPACE);
-            }
-        }
-
         if (!enabled_)
             return;
 
